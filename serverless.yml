@@ -18,13 +18,11 @@ custom:
       port: 8000
       inMemory: true
       migrate: true
-  
 
 provider:
   name: aws
   region: sa-east-1
   runtime: nodejs14.x
-  
 
 functions:
   generateCertificate:
@@ -33,6 +31,14 @@ functions:
       - http:
           path: /generateCertificate
           method: post
+          cors: true
+  
+  verifyCertificate:
+    handler: src/functions/verifyCertificate.handle
+    events:
+      - http:
+          path: /verifyCertificate/{id}
+          method: GET
           cors: true
 
 resources:

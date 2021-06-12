@@ -3,14 +3,14 @@ import path from "path";
 import fs from "fs";
 import handlebars from "handlebars";
 import dayjs from 'dayjs';
-import {S3} from 'aws-sdk';
+import { S3 } from 'aws-sdk';
 
 import { document } from '../utils/dynamodbClient';
 
 interface ICreateCertificate {
   id: string;
   name: string;
-  grade: string;  
+  grade: string;
 }
 
 interface ITemplate {
@@ -21,25 +21,37 @@ interface ITemplate {
   medal: string
 }
 
-const compile = async function(data:ITemplate) {
+const compile = async function (data: ITemplate) {
   const filePath = path.join(process.cwd(), "src", "functions", "templates", "certificate.hbs")
-  
+
   const html = fs.readFileSync(filePath, "utf-8")
- 
+
   return handlebars.compile(html)(data);
 }
 
 export const handle = async (event) => {
-  const { id, name, grade } =  JSON.parse(event.body) as ICreateCertificate;
+  const { id, name, grade } = JSON.parse(event.body) as ICreateCertificate;
 
-  await document.put({
+  const response = await document.query({
     TableName: "users_certificates",
-    Item: {
-      id,
-      name,
-      grade
+    KeyConditionExpression: "id = :id",
+    ExpressionAttributeValues: {
+      ":id": id
     }
-  }).promise();
+  }).promise()
+
+  const userAlreadyExists = response.Items[0];
+
+  if (!userAlreadyExists) {
+    await document.put({
+      TableName: "users_certificates",
+      Item: {
+        id,
+        name,
+        grade
+      }
+    }).promise();
+  }
 
   const medalPath = path.join(process.cwd(), "src", "functions", "templates", "selo.png")
   const medal = fs.readFileSync(medalPath, "base64")
@@ -49,7 +61,7 @@ export const handle = async (event) => {
     id,
     name,
     grade,
-    medal, 
+    medal,
     date: dayjs().format("DD/MM/YYYY"),
   }
 
@@ -69,22 +81,22 @@ export const handle = async (event) => {
   const contentPDF = await page.pdf({
     format: "a4",
     landscape: true,
-    path: process.env.IS_OFFLINE ? `${Date.now()}certificate.pdf`: null,
+    path: process.env.IS_OFFLINE ? `${Date.now()}certificate.pdf` : null,
     printBackground: true,
     preferCSSPageSize: true
   });
 
-   await (await browser).close()
+  await (await browser).close()
 
-   const s3 = new S3();
+  const s3 = new S3();
 
-    await s3.putObject({
-      Bucket: "servlesscreatecertificate",
-      Key: `${id}.pdf`,
-      ACL: "public-read",
-      Body: contentPDF,
-      ContentType: "application/pdf"
-    }).promise()
+  await s3.putObject({
+    Bucket: "servlesscreatecertificate",
+    Key: `${id}.pdf`,
+    ACL: "public-read",
+    Body: contentPDF,
+    ContentType: "application/pdf"
+  }).promise()
 
 
   return {
@@ -94,8 +106,8 @@ export const handle = async (event) => {
       URL: `https://servlesscreatecertificate.s3.sa-east-1.amazonaws.com/${id}.pdf`
     }),
     headers: {
-      "Content-Type":"application/json"
+      "Content-Type": "application/json"
     }
   };
-  
+
 }
