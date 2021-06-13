@@ -22,7 +22,7 @@ interface ITemplate {
 }
 
 const compile = async function (data: ITemplate) {
-  const filePath = path.join(process.cwd(), "src", "functions", "templates", "certificate.hbs")
+  const filePath = path.join(process.cwd(), "src", "templates", "certificate.hbs")
 
   const html = fs.readFileSync(filePath, "utf-8")
 
@@ -53,7 +53,7 @@ export const handle = async (event) => {
     }).promise();
   }
 
-  const medalPath = path.join(process.cwd(), "src", "functions", "templates", "selo.png")
+  const medalPath = path.join(process.cwd(), "src", "templates", "selo.png")
   const medal = fs.readFileSync(medalPath, "base64")
 
 
