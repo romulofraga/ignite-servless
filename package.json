@@ -10,18 +10,21 @@
   },
   "dependencies": {
     "babel-loader": "^8.2.2",
-    "chrome-aws-lambda": "^8.0.2",
+    "chrome-aws-lambda": "^10.0.0",
     "dayjs": "^1.10.4",
     "handlebars": "^4.7.7",
-    "puppeteer": "^9.0.0",
-    "puppeteer-core": "^9.0.0"
+    "puppeteer": "^10.0.0",
+    "puppeteer-core": "^10.0.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.14.5",
     "@serverless/typescript": "^2.23.0",
     "@types/aws-lambda": "^8.10.71",
+    "@types/node": "^15.12.2",
     "@types/puppeteer": "^5.4.3",
     "copy-webpack-plugin": "^8.1.1",
-    "serverless": "^2.46.0",
+    "inquirer": "^8.1.0",
+    "serverless": "^2.23.0",
     "serverless-dynamodb-local": "^0.2.39",
     "serverless-offline": "^6.9.0",
     "serverless-webpack": "^5.4.1",
